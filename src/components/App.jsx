@@ -1,44 +1,61 @@
-import React, { useState } from 'react';
-import { Searchbar } from './Searchbar';
-import { ImageGallery } from './ImageGallery';
-import { Button } from './Button';
-import { Loader } from './Loader';
-import { Modal } from './Modal';
-
-const API_KEY = "35640714-89aec83ac50fbde9100978e6e";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Searchbar } from './Searchbar/Searchbar';
+import { ImageGallery } from './ImageGallery/ImageGallery';
+import { CustomLoader } from './Loader/Loader';
+import { Button } from './Button/Button';
+import { Modal } from './Modal/Modal';
+import { FetchImages } from './Api/api';
+import styles from './App.module.css'
 
 export const App = () => {
-  const [query, setQuery] = useState('');
-  const [images, setImages] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
+  const [images, setImages] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSearchSubmit = (value) => {
-    setQuery(value);
+  useEffect(() => {
+    if (!searchQuery) return;
+
+    const fetchData = async () => {
+      setIsLoading(true);
+
+      try {
+        const newImages = await FetchImages(searchQuery, page);
+        setImages((prevImages) => [...prevImages, ...newImages]);
+      } catch (error) {
+        console.log(error);
+      }
+
+      setIsLoading(false);
+    };
+
+    fetchData();
+  }, [searchQuery, page]);
+
+  useEffect(() => {
+    const handleKeyPress = (event) => {
+      if (event.code === 'Escape') {
+        setSelectedImage(null);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyPress);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyPress);
+    };
+  }, []);
+
+  const handleSearchSubmit = (query) => {
+    setSearchQuery(query);
     setPage(1);
     setImages([]);
-    fetchImages(value, 1);
   };
 
   const handleLoadMore = () => {
-    const nextPage = page + 1;
-    fetchImages(query, nextPage);
-  };
-
-  const fetchImages = (query, page) => {
-    setLoading(true);
-
-    const url = `https://pixabay.com/api/?q=${query}&page=${page}&key=${API_KEY}&image_type=photo&orientation=horizontal&per_page=12`;
-
-    fetch(url)
-      .then((response) => response.json())
-      .then((data) => {
-        setImages((prevImages) => [...prevImages, ...data.hits]);
-        setPage(page);
-      })
-      .catch((error) => console.log(error))
-      .finally(() => setLoading(false));
+    setPage((prevPage) => prevPage + 1);
   };
 
   const handleImageClick = (image) => {
@@ -50,13 +67,13 @@ export const App = () => {
   };
 
   return (
-    <div>
+    <div className={styles.App}>
       <Searchbar onSubmit={handleSearchSubmit} />
       <ImageGallery images={images} onImageClick={handleImageClick} />
-      {loading && <Loader />}
-      {images.length > 0 && <Button onClick={handleLoadMore} />}
+      {isLoading && <CustomLoader  />}
+      {images.length > 0 && !isLoading && <Button onClick={handleLoadMore} />}
       {selectedImage && (
-        <Modal image={selectedImage} onClose={handleCloseModal} />
+        <Modal image={selectedImage.largeImageURL} onClose={handleCloseModal} />
       )}
     </div>
   );
