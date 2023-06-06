@@ -70,7 +70,9 @@ export const App = () => {
       <Searchbar onSubmit={handleSearchSubmit} />
       <ImageGallery images={images} onImageClick={handleImageClick} />
       {isLoading && <CustomLoader  />}
-      {images.length > 0 && !isLoading && <Button onClick={handleLoadMore} />}
+      {images.length > 0 && !isLoading && images.length % 12 === 0 && (
+        <Button onClick={handleLoadMore} />
+      )}
       {selectedImage && (
         <Modal image={selectedImage.largeImageURL} onClose={handleCloseModal} />
       )}
