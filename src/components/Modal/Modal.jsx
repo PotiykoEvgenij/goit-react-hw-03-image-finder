@@ -1,4 +1,5 @@
 import React, { useEffect, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import styles from './Modal.module.css'
 
 export const Modal = ({ isOpen, image, onClose }) => {
@@ -36,3 +37,9 @@ export const Modal = ({ isOpen, image, onClose }) => {
     </div>
   );
 };
+
+Modal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  image: PropTypes.string.isRequired,
+  onClose: PropTypes.func.isRequired,
+}

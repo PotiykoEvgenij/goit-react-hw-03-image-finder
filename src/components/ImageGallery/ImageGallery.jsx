@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import { Modal } from '../Modal/Modal';
 import { ImageGalleryItem } from '../ImageGalleryItem/ImageGalleryItem';
 import styles from './ImageGallery.module.css';
@@ -31,3 +32,14 @@ export const ImageGallery = ({ images }) => {
     </div>
   );
 };
+
+ImageGallery.propTypes = {
+  images: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      webformatURL: PropTypes.string.isRequired,
+      largeImageURL: PropTypes.string.isRequired,
+      tags: PropTypes.string.isRequired,
+    })
+  ).isRequired,
+}
